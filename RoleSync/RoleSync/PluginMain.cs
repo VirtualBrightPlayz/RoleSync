@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using EXILED;
 using EXILED.Extensions;
 using Newtonsoft.Json;
+using Harmony;
 
 namespace RoleSync
 {
@@ -18,9 +19,11 @@ namespace RoleSync
         public ConfigObject conf;
         public TcpClient client;
         public NetworkStream stream;
+        public HarmonyInstance inst;
 
         public override void OnDisable()
         {
+            inst.UnpatchAll();
             Events.PlayerJoinEvent -= PLEV.PlayerJoin;
             Events.ConsoleCommandEvent -= PLEV.ConsoleCmd;
             Events.RemoteAdminCommandEvent -= PLEV.RACmd;
@@ -40,6 +43,8 @@ namespace RoleSync
             Events.PlayerJoinEvent += PLEV.PlayerJoin;
             Events.ConsoleCommandEvent += PLEV.ConsoleCmd;
             Events.RemoteAdminCommandEvent += PLEV.RACmd;
+            inst = HarmonyInstance.Create("virtual.scpsl.rolesync");
+            inst.PatchAll();
         }
 
         public void LoadConfig()

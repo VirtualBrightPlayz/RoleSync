@@ -53,8 +53,8 @@
     <Reference Include="EXILED_Permissions">
       <HintPath>..\..\..\exiledlibs\Plugins\EXILED_Permissions.dll</HintPath>
     </Reference>
-    <Reference Include="Mirror.Components">
-      <HintPath>..\..\..\exiledlibs\game\Mirror.Components.dll</HintPath>
+    <Reference Include="Mirror">
+      <HintPath>..\..\..\exiledlibs\game\Mirror.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigObject.cs" />
+    <Compile Include="GetUserGroupPatch.cs" />
     <Compile Include="PluginEvents.cs" />
     <Compile Include="PluginMain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

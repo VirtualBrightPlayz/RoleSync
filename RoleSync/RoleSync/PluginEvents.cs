@@ -71,7 +71,7 @@ namespace RoleSync
                     {
                         ReturnData rd = JsonConvert.DeserializeObject<ReturnData>(str);
                         ReferenceHub hub = Player.GetPlayer(rd.id.Contains("@") ? rd.id : rd.id + "@steam");
-                        hub.SetRank(ServerStatic.PermissionsHandler._groups[rd.role]);
+                        hub.serverRoles.SetGroup(ServerStatic.PermissionsHandler._groups[rd.role], false);
                     }
                     catch (Exception e)
                     {
@@ -98,7 +98,6 @@ namespace RoleSync
                 byte[] arr = UTF8Encoding.UTF8.GetBytes(sendme);
                 plugin.stream.Write(arr, 0, arr.Length);
                 plugin.stream.Flush();
-                //ev.Player.SetRank(ServerStatic.PermissionsHandler._groups[]);
             }
             catch (Exception e)
             {
