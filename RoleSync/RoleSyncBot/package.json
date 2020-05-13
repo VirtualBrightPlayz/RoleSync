@@ -1,0 +1,12 @@
+{
+  "name": "role-sync-bot",
+  "version": "0.0.0",
+  "description": "RoleSyncBot",
+  "main": "app.js",
+  "author": {
+    "name": ""
+  },
+  "dependencies": {
+    "discord.js": "^12.2.0"
+  }
+}
