@@ -35,29 +35,32 @@ namespace RoleSync
 
         private IEnumerator<float> StreamCo()
         {
-            yield return Timing.WaitForSeconds(0.1f);
-            if (plugin.stream.DataAvailable)
+            while (true)
             {
-                List<byte> list = new List<byte>();
-                int data = plugin.stream.ReadByte();
-                while (data != -1)
+                yield return Timing.WaitForSeconds(0.1f);
+                if (plugin.stream.DataAvailable)
                 {
-                    list.Add((byte)data);
-                    data = plugin.stream.ReadByte();
-                    if (data != -1 && UTF8Encoding.UTF8.GetString(new byte[] { (byte)data }).Contains(";"))
+                    List<byte> list = new List<byte>();
+                    int data = plugin.stream.ReadByte();
+                    while (data != -1)
                     {
-                        break;
+                        list.Add((byte)data);
+                        data = plugin.stream.ReadByte();
+                        if (data != -1 && UTF8Encoding.UTF8.GetString(new byte[] { (byte)data }).Contains(";"))
+                        {
+                            break;
+                        }
                     }
+                    string str = UTF8Encoding.UTF8.GetString(list.ToArray());
+                    try
+                    {
+                        ReturnData rd = JsonConvert.DeserializeObject<ReturnData>(str);
+                        ReferenceHub hub = Player.GetPlayer(rd.id + "@steam");
+                        hub.SetRank(ServerStatic.PermissionsHandler._groups[rd.role]);
+                    }
+                    catch (Exception)
+                    { }
                 }
-                string str = UTF8Encoding.UTF8.GetString(list.ToArray());
-                try
-                {
-                    ReturnData rd = JsonConvert.DeserializeObject<ReturnData>(str);
-                    ReferenceHub hub = Player.GetPlayer(rd.id + "@steam");
-                    hub.SetRank(ServerStatic.PermissionsHandler._groups[rd.role]);
-                }
-                catch (Exception)
-                { }
             }
         }
 
