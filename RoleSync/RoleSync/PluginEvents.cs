@@ -60,7 +60,6 @@ namespace RoleSync
                     try
                     {
                         ReturnData rd = JsonConvert.DeserializeObject<ReturnData>(str);
-                        Log.Info("id=" + rd.id);
                         ReferenceHub hub = Player.GetPlayer(rd.id.Contains("@") ? rd.id : rd.id + "@steam");
                         hub.SetRank(ServerStatic.PermissionsHandler._groups[rd.role]);
                     }
