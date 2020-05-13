@@ -4,12 +4,14 @@ const config = require('./config.json');
 const net = require('net');
 const fs = require('fs');
 
-var database = "";
+var database = "{\"players\":{}}";
 
 if (fs.existsSync('./data.json'))
     database = fs.readFileSync('./data.json')
 
 var jsondatabase = JSON.parse(database);
+
+saveDataBase();
 
 function saveDataBase() {
     fs.writeFileSync('./data.json', JSON.stringify(jsondatabase));
@@ -30,8 +32,10 @@ client.on('message', msg => {
         var args = msg.content.split(' ');
         switch (args[0]) { // command
             case config.prefix + 'sync':
-                if (args.length === 2 && !Number.isNaN(Number.parseInt(args[1])) && args[1].length === 16) {
-                    jsondatabase.players[msg.author.id] = Number.parseInt(args[1]);
+                console.log(args[1]);
+                if (args.length === 2 /*&& !Number.isNaN(Number.parseInt(args[1], 10)) && args[1].length === 17*/) {
+                    jsondatabase.players[msg.author.id] = args[1];
+                    saveDataBase();
                     msg.reply('```diff\n+ Steam64Id Connected```');
                 }
                 else {
@@ -51,7 +55,8 @@ var server = net.createServer(function (sock) {
     console.log('OPENED: IP=' + sock.remoteAddress + ' PORT=' + sock.remotePort);
     sock.on('data', function (data) {
         try {
-            var jdata = JSON.parse(data);
+            var jdata = JSON.parse(data.toString());
+            console.log(jdata);
             if (jdata.command === "playerjoin") {
                 var keys = Object.keys(jsondatabase.players);
                 var objs = Object.values(jsondatabase.players);

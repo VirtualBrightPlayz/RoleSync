@@ -16,13 +16,13 @@ namespace RoleSync
         public class DiscordData
         {
             public string command { get; set; }
-            public ulong steamid { get; set; }
+            public string steamid { get; set; }
         }
 
         public class ReturnData
         {
             public string role { get; set; }
-            public ulong id { get; set; }
+            public string id { get; set; }
         }
 
         private CoroutineHandle handle;
@@ -30,7 +30,12 @@ namespace RoleSync
         public PluginEvents(PluginMain pluginMain)
         {
             this.plugin = pluginMain;
-            handle = Timing.RunCoroutine(StreamCo());
+            handle = Timing.RunCoroutine(StreamCo(), Segment.Update);
+        }
+
+        ~PluginEvents()
+        {
+            Timing.KillCoroutines(handle);
         }
 
         private IEnumerator<float> StreamCo()
@@ -55,28 +60,26 @@ namespace RoleSync
                     try
                     {
                         ReturnData rd = JsonConvert.DeserializeObject<ReturnData>(str);
-                        ReferenceHub hub = Player.GetPlayer(rd.id + "@steam");
+                        Log.Info("id=" + rd.id);
+                        ReferenceHub hub = Player.GetPlayer(rd.id.Contains("@") ? rd.id : rd.id + "@steam");
                         hub.SetRank(ServerStatic.PermissionsHandler._groups[rd.role]);
                     }
-                    catch (Exception)
-                    { }
+                    catch (Exception e)
+                    {
+                        Log.Error(e.ToString());
+                    }
                 }
             }
         }
 
-        ~PluginEvents()
-        {
-            Timing.KillCoroutines(handle);
-        }
-
-        internal void PlayerJoin(PlayerJoinEvent ev)
+        public void SendData(ReferenceHub hub)
         {
             try
             {
                 var data = new DiscordData()
                 {
-                    command = "",
-                    steamid = ulong.Parse(ev.Player.GetUserId().Substring(0, 16))
+                    command = "playerjoin",
+                    steamid = hub.GetUserId()
                 };
                 string sendme = JsonConvert.SerializeObject(data);
                 byte[] arr = UTF8Encoding.UTF8.GetBytes(sendme);
@@ -84,7 +87,24 @@ namespace RoleSync
                 plugin.stream.Flush();
                 //ev.Player.SetRank(ServerStatic.PermissionsHandler._groups[]);
             }
-        catch (Exception) { }
+            catch (Exception e)
+            {
+                Log.Error(e.ToString());
+            }
+        }
+
+        internal void ConsoleCmd(ConsoleCommandEvent ev)
+        {
+            if (ev.Command == "rankme")
+            {
+                SendData(ev.Player);
+                ev.ReturnMessage = "OK.";
+            }
+        }
+
+        internal void PlayerJoin(PlayerJoinEvent ev)
+        {
+            SendData(ev.Player);
         }
     }
 }
