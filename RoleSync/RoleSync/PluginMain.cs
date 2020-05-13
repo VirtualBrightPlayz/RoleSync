@@ -23,6 +23,7 @@ namespace RoleSync
         {
             Events.PlayerJoinEvent -= PLEV.PlayerJoin;
             Events.ConsoleCommandEvent -= PLEV.ConsoleCmd;
+            Events.RemoteAdminCommandEvent -= PLEV.RACmd;
             PLEV = null;
             client.Close();
             client.Dispose();
@@ -33,11 +34,12 @@ namespace RoleSync
         {
             LoadConfig();
             client = new TcpClient();
-            client.Connect("127.0.0.1", 6000);
+            client.Connect(conf.ip, conf.port);
             stream = client.GetStream();
             PLEV = new PluginEvents(this);
             Events.PlayerJoinEvent += PLEV.PlayerJoin;
             Events.ConsoleCommandEvent += PLEV.ConsoleCmd;
+            Events.RemoteAdminCommandEvent += PLEV.RACmd;
         }
 
         public void LoadConfig()

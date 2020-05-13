@@ -6,6 +6,7 @@ using MEC;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using System.Net.Sockets;
 
 namespace RoleSync
 {
@@ -43,6 +44,15 @@ namespace RoleSync
             while (true)
             {
                 yield return Timing.WaitForSeconds(0.1f);
+                if (!plugin.client.Connected)
+                {
+                    try
+                    {
+                        plugin.client.Connect(plugin.conf.ip, plugin.conf.port);
+                    }
+                    catch (SocketException) { }
+                    yield return Timing.WaitForSeconds(0.5f);
+                }
                 if (plugin.stream.DataAvailable)
                 {
                     List<byte> list = new List<byte>();
@@ -71,6 +81,10 @@ namespace RoleSync
             }
         }
 
+        internal void RACmd(ref RACommandEvent ev)
+        {
+        }
+
         public void SendData(ReferenceHub hub)
         {
             try
@@ -94,7 +108,7 @@ namespace RoleSync
 
         internal void ConsoleCmd(ConsoleCommandEvent ev)
         {
-            if (ev.Command == "rankme")
+            if (ev.Command.ToLower() == "rankme")
             {
                 SendData(ev.Player);
                 ev.ReturnMessage = "OK.";
