@@ -18,12 +18,15 @@ namespace RoleSync
         {
             public string command { get; set; }
             public string steamid { get; set; }
+            public string[] players { get; set; }
         }
 
         public class ReturnData
         {
+            public string command { get; set; }
             public string role { get; set; }
             public string id { get; set; }
+            public bool shouldHide { get; set; }
         }
 
         private CoroutineHandle handle;
@@ -46,6 +49,7 @@ namespace RoleSync
                 yield return Timing.WaitForSeconds(0.1f);
                 if (!plugin.client.Connected)
                 {
+                    Log.Info("Reconnecting...");
                     try
                     {
                         plugin.client.Connect(plugin.conf.ip, plugin.conf.port);
@@ -70,8 +74,30 @@ namespace RoleSync
                     try
                     {
                         ReturnData rd = JsonConvert.DeserializeObject<ReturnData>(str);
-                        ReferenceHub hub = Player.GetPlayer(rd.id.Contains("@") ? rd.id : rd.id + "@steam");
-                        hub.serverRoles.SetGroup(ServerStatic.PermissionsHandler._groups[rd.role], false);
+                        switch (rd.command)
+                        {
+                            case "rolesync":
+                                ReferenceHub hub = Player.GetPlayer(rd.id.Contains("@") ? rd.id : rd.id + "@steam");
+                                hub.serverRoles.SetGroup(ServerStatic.PermissionsHandler._groups[rd.role], false, disp: rd.shouldHide);
+                                break;
+                            case "playerlist":
+                                List<string> players = new List<string>();
+                                foreach (var plr in PlayerManager.players)
+                                {
+                                    if (plr != PlayerManager.localPlayer)
+                                        players.Add(plr.GetPlayer().GetNickname() + " " + plr.GetPlayer().GetUserId());
+                                }
+                                var sendme = new DiscordData()
+                                {
+                                    command = "playerlist",
+                                    players = players.ToArray()
+                                };
+                                string sendme2 = JsonConvert.SerializeObject(sendme);
+                                byte[] arr = UTF8Encoding.UTF8.GetBytes(sendme2);
+                                plugin.stream.Write(arr, 0, arr.Length);
+                                plugin.stream.Flush();
+                                break;
+                        }
                     }
                     catch (Exception e)
                     {
