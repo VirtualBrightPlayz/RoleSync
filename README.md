@@ -12,6 +12,7 @@ uses nodejs. make sure to install everything.
   "prefix": "+",
   "port": 6000,
   "guild": "guildid",
+  "channel": "botchannelid",
   "roles": [
     {
       "id": "adminroleid",
