@@ -19,6 +19,7 @@ namespace RoleSync
             public string command { get; set; }
             public string steamid { get; set; }
             public string[] players { get; set; }
+            public string serverName { get; set; }
         }
 
         public class ReturnData
@@ -90,7 +91,8 @@ namespace RoleSync
                                 var sendme = new DiscordData()
                                 {
                                     command = "playerlist",
-                                    players = players.ToArray()
+                                    players = players.ToArray(),
+                                    serverName = plugin.conf.name
                                 };
                                 string sendme2 = JsonConvert.SerializeObject(sendme);
                                 byte[] arr = UTF8Encoding.UTF8.GetBytes(sendme2);
@@ -118,7 +120,8 @@ namespace RoleSync
                 var data = new DiscordData()
                 {
                     command = "playerjoin",
-                    steamid = hub.GetUserId()
+                    steamid = hub.GetUserId(),
+                    serverName = plugin.conf.name
                 };
                 string sendme = JsonConvert.SerializeObject(data);
                 byte[] arr = UTF8Encoding.UTF8.GetBytes(sendme);

@@ -108,7 +108,7 @@ var server = net.createServer(function (sock) {
                         str += '```';
                         var listguild = client.guilds.resolve(config.guild);
                         var chnl = listguild.channels.resolve(config.channel);
-                        chnl.send('List of players: ' + str);
+                        chnl.send('List of players on `' + jdata.serverName + '`: ' + str);
                     }
                     break;
             }
