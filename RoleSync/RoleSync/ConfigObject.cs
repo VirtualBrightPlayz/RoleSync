@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Exiled.API.Interfaces;
+using System.Collections.Generic;
 
 namespace RoleSync
 {

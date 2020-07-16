@@ -1,12 +1,12 @@
-﻿using EXILED;
-using EXILED.Extensions;
-using System;
+﻿using System;
 using System.Text;
 using MEC;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Net.Sockets;
+using Exiled.API.Features;
+using Exiled.Events.EventArgs;
 
 namespace RoleSync
 {
@@ -78,15 +78,16 @@ namespace RoleSync
                         switch (rd.command)
                         {
                             case "rolesync":
-                                ReferenceHub hub = Player.GetPlayer(rd.id.Contains("@") ? rd.id : rd.id + "@steam");
+                                ReferenceHub hub = Player.Get(rd.id.Contains("@") ? rd.id : rd.id + "@steam").ReferenceHub;
                                 hub.serverRoles.SetGroup(ServerStatic.PermissionsHandler._groups[rd.role], false, disp: rd.shouldHide);
                                 break;
                             case "playerlist":
                                 List<string> players = new List<string>();
                                 foreach (var plr in PlayerManager.players)
                                 {
+                                    var play = new Player(plr);
                                     if (plr != PlayerManager.localPlayer)
-                                        players.Add(plr.GetPlayer().GetNickname() + " " + plr.GetPlayer().GetUserId());
+                                        players.Add(play.Nickname + " " + play.UserId);
                                 }
                                 var sendme = new DiscordData()
                                 {
@@ -109,10 +110,6 @@ namespace RoleSync
             }
         }
 
-        internal void RACmd(ref RACommandEvent ev)
-        {
-        }
-
         public void SendData(ReferenceHub hub)
         {
             try
@@ -120,7 +117,7 @@ namespace RoleSync
                 var data = new DiscordData()
                 {
                     command = "playerjoin",
-                    steamid = hub.GetUserId(),
+                    steamid = new Player(hub).UserId,
                     serverName = plugin.conf.name
                 };
                 string sendme = JsonConvert.SerializeObject(data);
@@ -134,18 +131,18 @@ namespace RoleSync
             }
         }
 
-        internal void ConsoleCmd(ConsoleCommandEvent ev)
+        /*internal void ConsoleCmd(ConsoleCommandEvent ev)
         {
             if (ev.Command.ToLower() == "rankme")
             {
                 SendData(ev.Player);
                 ev.ReturnMessage = "OK.";
             }
-        }
+        }*/
 
-        internal void PlayerJoin(PlayerJoinEvent ev)
+        internal void PlayerJoin(JoinedEventArgs ev)
         {
-            SendData(ev.Player);
+            SendData(ev.Player.ReferenceHub);
         }
     }
 }

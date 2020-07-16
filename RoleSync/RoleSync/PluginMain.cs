@@ -5,52 +5,52 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using EXILED;
-using EXILED.Extensions;
 using Newtonsoft.Json;
-using Harmony;
+using HarmonyLib;
+using Exiled.Events;
+using Exiled.API.Features;
+using Exiled.Events;
 
 namespace RoleSync
 {
-    public class PluginMain : Plugin
+    public class PluginMain : Plugin<Config>
     {
-        public override string getName => "DiscordRoleSync";
+        public override string Name => "DiscordRoleSync";
+        public override string Author => "VirtualBrightPlayz";
+        public override Version Version => new Version(1, 4, 0);
         public PluginEvents PLEV;
         public ConfigObject conf;
         public TcpClient client;
         public NetworkStream stream;
-        public HarmonyInstance inst;
+        public Harmony inst;
 
-        public override void OnDisable()
+        public override void OnDisabled()
         {
+            base.OnDisabled();
             inst.UnpatchAll();
-            Events.PlayerJoinEvent -= PLEV.PlayerJoin;
-            Events.ConsoleCommandEvent -= PLEV.ConsoleCmd;
-            Events.RemoteAdminCommandEvent -= PLEV.RACmd;
+            Exiled.Events.Handlers.Player.Joined -= PLEV.PlayerJoin;
             PLEV = null;
             client.Close();
             client.Dispose();
             client = null;
         }
 
-        public override void OnEnable()
+        public override void OnEnabled()
         {
+            base.OnEnabled();
             LoadConfig();
             client = new TcpClient();
             client.Connect(conf.ip, conf.port);
             stream = client.GetStream();
             PLEV = new PluginEvents(this);
-            Events.PlayerJoinEvent += PLEV.PlayerJoin;
-            Events.ConsoleCommandEvent += PLEV.ConsoleCmd;
-            Events.RemoteAdminCommandEvent += PLEV.RACmd;
-            inst = HarmonyInstance.Create("virtual.scpsl.rolesync");
+            Exiled.Events.Handlers.Player.Joined += PLEV.PlayerJoin;
+            inst = new Harmony("virtual.scpsl.rolesync");
             inst.PatchAll();
         }
 
         public void LoadConfig()
         {
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string pluginDir = Path.Combine(appData, "Plugins", "RoleSync");
+            string pluginDir = Path.Combine(Paths.Configs, "RoleSync");
             if (!Directory.Exists(pluginDir))
                 Directory.CreateDirectory(pluginDir);
             string path = Path.Combine(pluginDir, "config" + ServerStatic.ServerPort + ".json");
@@ -59,8 +59,9 @@ namespace RoleSync
             conf = JsonConvert.DeserializeObject<ConfigObject>(File.ReadAllText(path));
         }
 
-        public override void OnReload()
+        public override void OnReloaded()
         {
+            base.OnReloaded();
             LoadConfig();
         }
     }
